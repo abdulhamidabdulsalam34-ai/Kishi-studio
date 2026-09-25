@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>KISHI V11 FULL MOVIE</title>
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0a0a0a;color:#fff;font-family:system-ui;padding:10px}
+.top{text-align:center;padding:10px;border-bottom:2px solid #8a2be2}
+.top h1{margin:0;font-size:19px}.top p{color:#22c55e;font-size:11px}
+.key{background:#1a1a00;border:1px solid #665500;padding:10px;border-radius:10px;margin:10px 0}
+.tabs{display:flex;gap:6px;overflow:auto;padding:10px 0}
+.tab{padding:10px 14px;border-radius:20px;background:#1e1e1e;border:1px solid #333;color:#fff;font-weight:700;white-space:nowrap}
+.tab.on{background:#8a2be2}
+.panel{display:none;background:#151515;border:1px solid #262626;border-radius:14px;padding:12px}
+.panel.on{display:block}
+label{color:#22c55e;font-weight:700;font-size:12px;margin-top:10px;display:block}
+input,select,textarea{width:100%;margin-top:5px;background:#000;border:1px solid #333;color:#fff;padding:11px;border-radius:8px}
+.btn{width:100%;margin-top:10px;padding:14px;border:none;border-radius:26px;background:linear-gradient(90deg,#8a2be2,#22c55e);color:#fff;font-weight:800;font-size:15px}
+.btn2{background:#222;border:1px solid #444}
+.scene{border:1px solid #333;background:#111;border-radius:12px;padding:10px;margin-top:10px;position:relative}
+.scene h4{margin:0 0 8px;color:#8a2be2}
+.del{position:absolute;top:8px;right:8px;background:#ff2222;color:#fff;border:none;border-radius:50%;width:28px;height:28px}
+.prev{width:100%;height:160px;background:#000;border:1px dashed #444;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-top:5px}
+.prev img{width:100%;height:100%;object-fit:cover}
+#log{margin-top:10px;background:#111;border:1px solid #333;padding:8px;border-radius:8px;font-size:11px;white-space:pre-wrap;display:none;max-height:200px;overflow:auto}
+video{width:100%;margin-top:8px;border-radius:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style>
+</head>
+<body>
+<div class="top"><h1>🎬 KISHI STUDIO V11 FULL MOVIE</h1><p>15 SCENES • REAL MOVING + TALKING • AUTO JOIN 1 MOVIE • 100% TAPPING</p></div>
+
+<div class="key">
+<label>🔑 FAL KEY (paste your key)</label>
+<input type="password" id="falKey" placeholder="Paste fal key here">
+<div style="font-size:11px;color:#aaa;margin-top:4px">Your old key: 71f896ad... (delete after test and create new one for safety)</div>
+</div>
+
+<div class="tabs">
+<button class="tab on" onclick="openT('p1',this)">FULL MOVIE BUILDER</button>
+<button class="tab" onclick="openT('p2',this)">GENERATED</button>
+<button class="tab" onclick="openT('p3',this)">JOINED MOVIE</button>
+</div>
+
+<div id="p1" class="panel on">
+<div class="grid">
+<button class="btn" onclick="addScene()">➕ ADD NEW SCENE (up to 15)</button>
+<button class="btn btn2" onclick="clearAll()">🗑️ CLEAR ALL</button>
+</div>
+<div id="scenes"></div>
+<button class="btn" id="genAll" onclick="generateAllScenes()">🎬 GENERATE ALL SCENES (REAL AI)</button>
+<div id="log"></div>
+</div>
+
+<div id="p2" class="panel">
+<h3>All Generated Scenes</h3>
+<div id="generatedList"></div>
+<button class="btn" onclick="joinAllVideos()">🎞️ AUTO JOIN ALL TO 1 FULL MOVIE</button>
+</div>
+
+<div id="p3" class="panel">
+<h3>Final Full Movie</h3>
+<video id="finalVideo" controls style="display:none"></video>
+<a id="finalDl" class="btn" style="display:none;text-align:center;text-decoration:none" download>⬇️ DOWNLOAD FULL MOVIE</a>
+<div id="finalLog"></div>
+</div>
+
+<script>
+let scenesData = [];
+let generatedVideos = [];
+const {FFmpeg} = window.FFmpegWASM;
+const {fetchFile} = window.FFmpegUtil;
+
+function openT(pid,btn){
+ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+ document.getElementById(pid).classList.add('on');
+ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+ btn.classList.add('on');
+}
+function addScene(){
+ if(scenesData.length>=15){alert('Max 15 scenes');return;}
+ const id=Date.now();
+ scenesData.push({id, img:null, motion:'character talking and moving cinematic, natural motion', dialogue:'Hello! This is scene '+(scenesData.length+1), dur:'5'});
+ renderScenes();
+}
+function clearAll(){ if(confirm('Clear all scenes?')){scenesData=[]; generatedVideos=[]; renderScenes(); document.getElementById('generatedList').innerHTML=''; log('Cleared');}}
+function renderScenes(){
+ const c=document.getElementById('scenes'); c.innerHTML='';
+ scenesData.forEach((s,i)=>{
+  c.innerHTML+=`
+  <div class="scene" id="s_${s.id}">
+  <h4>SCENE ${i+1}</h4>
+  <button class="del" onclick="delScene(${s.id})">x</button>
+  <label>Image ${i+1}</label><input type="file" accept="image/*" onchange="loadImg(event,${s.id})">
+  <div class="prev" id="prev_${s.id}">No image</div>
+  <label>Motion Prompt</label><input type="text" value="${s.motion}" onchange="scenesData[${i}].motion=this.value">
+  <label>Dialogue (Talking)</label><textarea rows="2" onchange="scenesData[${i}].dialogue=this.value">${s.dialogue}</textarea>
+  <label>Duration</label><select onchange="scenesData[${i}].dur=this.value"><option value="5" ${s.dur=='5'?'selected':''}>5s</option><option value="8" ${s.dur=='8'?'selected':''}>8s</option></select>
+  </div>`;
+ });
+ // restore previews
+ setTimeout(()=>{ scenesData.forEach(s=>{ if(s.img) document.getElementById('prev_'+s.id).innerHTML='<img src="'+s.img+'">'; }); },100);
+}
+function delScene(id){scenesData=scenesData.filter(x=>x.id!=id); renderScenes();}
+function loadImg(e,id){
+ const f=e.target.files[0]; if(!f)return;
+ const r=new FileReader(); r.onload=ev=>{
+  const data=ev.target.result;
+  const sc=scenesData.find(x=>x.id==id); if(sc) sc.img=data;
+  document.getElementById('prev_'+id).innerHTML='<img src="'+data+'">';
+ }; r.readAsDataURL(f);
+}
+function log(m){ const el=document.getElementById('log'); el.style.display='block'; el.textContent+=m+'\n'; el.scrollTop=el.scrollHeight; }
+
+async function uploadToFal(key,dataUrl){
+ const blob=await (await fetch(dataUrl)).blob();
+ const form=new FormData(); form.append('file',blob,'scene.jpg');
+ const res=await fetch('https://rest.fal.ai/fal-ai/upload-file',{method:'POST',headers:{'Authorization':'Key '+key},body:form});
+ const j=await res.json(); return j.url||j.file_url;
+}
+
+async function pollResult(key,statusUrl){
+ for(let i=0;i<60;i++){
+  await new Promise(r=>setTimeout(r,3000));
+  const s=await fetch(statusUrl,{headers:{'Authorization':'Key '+key}});
+  const sj=await s.json();
+  if(sj.status==='COMPLETED') return sj.response||sj;
+  if(sj.status==='FAILED') throw new Error('Failed '+JSON.stringify(sj));
+ }
+ throw new Error('Timeout');
+}
+
+async function generateAllScenes(){
+ const key=document.getElementById('falKey').value.trim();
+ if(!key){alert('Paste Fal key');return;}
+ if(scenesData.length==0){alert('Add at least 1 scene');return;}
+ if(scenesData.some(s=>!s.img)){alert('Upload image for all scenes');return;}
+
+ document.getElementById('log').textContent=''; generatedVideos=[];
+ document.getElementById('genAll').disabled=true;
+
+ for(let idx=0; idx<scenesData.length; idx++){
+  const s=scenesData[idx];
+  try{
+   log(`\n--- SCENE ${idx+1}/${scenesData.length} ---`);
+   log('Uploading image...');
+   const imgUrl=await uploadToFal(key,s.img);
+   log('Generating moving video...');
+   let vRes=await fetch('https://queue.fal.run/minimax/h3/image-to-video',{method:'POST',headers:{'Authorization':'Key '+key,'Content-Type':'application/json'},body:JSON.stringify({image_url:imgUrl,prompt:s.motion+', character speaking',duration:s.dur,resolution:'768P'})});
+   let q=await vRes.json();
+   let statusUrl=q.response_url||`https://queue.fal.run/minimax/h3/image-to-video/requests/${q.request_id}/status`;
+   let vData=await pollResult(key,statusUrl);
+   let videoUrl=vData.video?.url||vData.video_url;
+   log('Video OK: '+videoUrl);
+
+   // TTS
+   log('Generating voice...');
+   let tRes=await fetch('https://queue.fal.run/fal-ai/elevenlabs/text-to-speech/turbo-v2.5',{method:'POST',headers:{'Authorization':'Key '+key,'Content-Type':'application/json'},body:JSON.stringify({text:s.dialogue,voice:'Rachel'})});
+   let tq=await tRes.json();
+   let tStatus=tq.response_url||`https://queue.fal.run/fal-ai/elevenlabs/text-to-speech/turbo-v2.5/requests/${tq.request_id}/status`;
+   let tData=await pollResult(key,tStatus);
+   let audioUrl=tData.audio?.url;
+   log('Audio OK');
+
+   // Lipsync
+   log('Lipsyncing...');
+   let lRes=await fetch('https://queue.fal.run/fal-ai/sync-lipsync',{method:'POST',headers:{'Authorization':'Key '+key,'Content-Type':'application/json'},body:JSON.stringify({video_url:videoUrl,audio_url:audioUrl})});
+   let lq=await lRes.json();
+   let lStatus=lq.response_url||`https://queue.fal.run/fal-ai/sync-lipsync/requests/${lq.request_id}/status`;
+   let lData=await pollResult(key,lStatus);
+   let finalUrl=lData.video?.url||videoUrl;
+   log(`✅ SCENE ${idx+1} DONE!`);
+
+   generatedVideos.push(finalUrl);
+   document.getElementById('generatedList').innerHTML+=`<div class="scene"><h4>Scene ${idx+1} Ready</h4><video src="${finalUrl}" controls></video><p>${s.dialogue.substring(0,60)}</p></div>`;
+
+  }catch(e){ log('❌ Scene '+(idx+1)+' error: '+e.message); }
+ }
+ document.getElementById('genAll').disabled=false;
+ log('\n🎉 ALL SCENES DONE! Go to GENERATED tab and click AUTO JOIN');
+ openT('p2',document.querySelectorAll('.tab')[1]);
+}
+
+async function joinAllVideos(){
+ if(generatedVideos.length==0){alert('Generate scenes first');return;}
+ const finalLog=document.getElementById('finalLog'); finalLog.innerText='Joining '+generatedVideos.length+' videos with FFmpeg... (may take 1-2 mins)';
+ const ffmpeg=new FFmpeg(); await ffmpeg.load();
+ // Write files
+ for(let i=0;i<generatedVideos.length;i++){
+  const data=await fetchFile(generatedVideos[i]);
+  await ffmpeg.writeFile(`in${i}.mp4`,data);
+ }
+ // Create concat list
+ let list='';
+ for(let i=0;i<generatedVideos.length;i++) list+=`file in${i}.mp4\n`;
+ await ffmpeg.writeFile('list.txt',list);
+ await ffmpeg.exec(['-f','concat','-safe','0','-i','list.txt','-c','copy','out.mp4']);
+ const outData=await ffmpeg.readFile('out.mp4');
+ const blob=new Blob([outData.buffer],{type:'video/mp4'});
+ const url=URL.createObjectURL(blob);
+ const fv=document.getElementById('finalVideo'); fv.src=url; fv.style.display='block';
+ const dl=document.getElementById('finalDl'); dl.href=url; dl.download='KISHI_FULL_MOVIE.mp4'; dl.style.display='block';
+ finalLog.innerText='✅ FULL MOVIE JOINED! '+generatedVideos.length+' scenes = 1 movie. Download below.';
+ openT('p3',document.querySelectorAll('.tab')[2]);
+}
+
+// Init with 2 scenes
+addScene(); addScene();
+</script>
+</body>
+</html>
